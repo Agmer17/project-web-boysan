@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spring WebSocket Private Chat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <h2>Private Chat Test</h2>
+
+  <h1>{{username}}</h1>
+  <h1>{{session}}</h1>
+
+  <div>
+    <label>Send To (username):</label>
+    <input type="text" id="toUser" placeholder="e.g. admin">
+  </div>
+
+  <h2>Active Admins</h2>
+  <ul id="admin-list"></ul>
+
+  <div>
+    <label>Message:</label>
+    <input type="text" id="messageInput" placeholder="Your message...">
+  </div>
+
+  <button onclick="sendPrivateMessage()">Send</button>
+
+  <h3>Received Messages:</h3>
+  <ul id="messages"></ul>
+
+  <script>
+    let stompClient = null;
+    let username = "{{username}}"
+
+    function connect() {
+      const socket = new SockJS('/ws'); 
+      stompClient = Stomp.over(socket);
+
+      stompClient.connect({}, function(frame) {
+        console.log('Connected: ' + frame);
+
+          stompClient.subscribe("/user/{{username}}/queue/messages", function(messageFrame) {
+          console.log("Pesan Diterima:");
+          console.log(messageFrame); 
+          console.log("Isi pesan (body): " + messageFrame.body); 
+        try {
+            const chatMessage = JSON.parse(messageFrame.body);
+            console.log("Berhasil parse JSON:", chatMessage);
+            const li = document.createElement("li");
+            li.innerText = `from : ${chatMessage.from} ${chatMessage.message}`;
+            document.getElementById("messages").appendChild(li);
+        } catch (e) {
+            console.error("Gagal parse JSON:", e);
+            console.log("Isi body yang gagal diparse:", messageFrame.body);
+        }
+            });
+          });
+    }
+
+    function sendPrivateMessage() {
+    const toUser = document.getElementById("toUser").value;
+    const messageContent = document.getElementById("messageInput").value;
+
+    if (stompClient && toUser && messageContent) {
+        const chatMessage = {
+            to: toUser,
+            message: messageContent,
+            ownMessage : true
+        };
+
+        console.log("Mengirim pesan:", chatMessage);
+        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
+    }
+}
+
+async function getActiveAdmins() {
+  try {
+    const response = await fetch("/live-chat/active-admin", {
+      method: "GET",
+      credentials: "include" // penting: biar cookie otomatis ikut
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP error! status: " + response.status);
+    }
+
+    const admins = await response.json(); 
+    console.log("Active admins:", admins);
+
+    renderAdminList(admins);
+  } catch (err) {
+    console.error("Failed to fetch active admins:", err);
+  }
+}
+
+function renderAdminList(admins) {
+  const list = document.getElementById("admin-list");
+  list.innerHTML = ""; // reset isi dulu
+
+  if (admins.length === 0) {
+    list.innerHTML = "<li>No admins online</li>";
+    return;
+  }
+
+  admins.forEach(admin => {
+    const li = document.createElement("li");
+
+    if (admin.username === username) {
+      return;
+    }
+
+    // bisa pakai template innerHTML biar gampang
+    li.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img 
+          src="${admin.imageUrl || '/img/default.jpg'}" 
+          alt="${admin.username}" 
+          width="32" 
+          height="32" 
+          style="border-radius:50%; object-fit:cover;"
+        />
+        <div>
+          <strong>${admin.fullName}</strong> <br/>
+          <small>@${admin.username} • ${admin.role}</small>
+          <small>online ${admin.online}</small>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+
+    connect();
+    getActiveAdmins();
+
+    setInterval(() => getActiveAdmins(), 10000);
+  </script>
+</body>
+</html>

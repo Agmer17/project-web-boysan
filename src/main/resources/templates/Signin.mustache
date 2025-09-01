@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign In</title>
+</head>
+<body>
+<h2>Sign In Page</h2>
+
+<form method="post" action="/auth/sign-in">
+    <div>
+        <label>Username</label>
+        <input type="text" name="username" value="{{username}}" placeholder="username..."/>
+        {{#validationErrors.username}}
+            <p style="color:red">{{.}}</p>
+        {{/validationErrors.username}}
+    </div>
+
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" value="{{email}}" placeholder="email..."/>
+        {{#validationErrors.email}}
+            <p style="color:red">{{.}}</p>
+        {{/validationErrors.email}}
+    </div>
+
+    <div>
+        <label>Full Name</label>
+        <input type="text" name="fullName" value="{{fullName}}" placeholder="your full name..."/>
+        {{#validationErrors.fullName}}
+            <p style="color:red">{{.}}</p>
+        {{/validationErrors.fullName}}
+    </div>
+
+    <div>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="password..."/>
+        {{#validationErrors.password}}
+            <p style="color:red">{{.}}</p>
+        {{/validationErrors.password}}
+    </div>
+
+    {{#errorMessage}}
+        <p style="color:red">{{.}}</p>
+    {{/errorMessage}}
+
+    <button type="submit">Sign In</button>
+</form>
+
+</body>
+</html>
