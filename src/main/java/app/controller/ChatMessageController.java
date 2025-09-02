@@ -14,6 +14,8 @@ import app.event.PresenceEventListener;
 import app.model.dto.ChatMessage;
 import app.model.entity.BaseUserDataLiveChat;
 import app.service.LiveChatService;
+import app.service.MailService;
+import jakarta.mail.MessagingException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,8 +35,12 @@ public class ChatMessageController {
     @Autowired
     private LiveChatService service;
 
+    @Autowired
+    private MailService mailService;
+
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
+    public void processMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor)
+            throws MessagingException {
         String sender = (String) headerAccessor.getSessionAttributes().get("username");
 
         message.setFrom(sender);
@@ -42,11 +48,10 @@ public class ChatMessageController {
         service.saveMessage(message); // async ajah gaperlu nunggu ampe beres brok
                                       // lama soalnya wkwkwkwkk
 
-        // System.out.println(message);
-
         messagingTemplate.convertAndSendToUser(message.getTo(), "/queue/messages", message);
         messagingTemplate.convertAndSendToUser(sender, "/queue/messages", message);
 
+        mailService.sendEmail(message.getTo(), "notifikasi pesan baru", "<h1> kamu menerima pesan baru </h1>");
     }
 
     @GetMapping("/live-chat/active-admin")

@@ -15,5 +15,5 @@ public class UserAuthDetails {
     private String passwordHash;
     private String role;
     private String fullName;
-    private String image_url;
+    private String email;
 }

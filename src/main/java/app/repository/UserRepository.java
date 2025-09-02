@@ -20,7 +20,7 @@ public class UserRepository {
 
     public UserAuthDetails findDetailsUsername(String username) {
         var sql = """
-                select username, password_hash, role, full_name, image_url from users
+                select username, password_hash, role, full_name, email from users
                 where username = :username
                 """;
 
@@ -65,5 +65,4 @@ public class UserRepository {
 
         return rs;
     }
-
 }

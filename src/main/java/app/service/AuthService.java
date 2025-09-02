@@ -14,7 +14,6 @@ import app.model.exception.AuthCredentialsException;
 import app.repository.UserRepository;
 import app.utils.JwtUtils;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service

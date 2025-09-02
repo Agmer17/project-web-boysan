@@ -58,9 +58,9 @@ public class JwtUtils {
     public String getUsernameFromCookie(HttpServletRequest request) {
         String token = null;
         if (request.getCookies() != null) {
-            System.out.println("\n\n\n\n");
+            // System.out.println("\n\n\n\n");
             for (Cookie cookie : request.getCookies()) {
-                System.out.println(cookie.getValue());
+                // System.out.println(cookie.getValue());
 
                 if ("Credentials".equals(cookie.getName())) {
                     token = cookie.getValue();
