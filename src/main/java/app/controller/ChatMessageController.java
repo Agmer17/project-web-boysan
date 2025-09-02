@@ -35,9 +35,6 @@ public class ChatMessageController {
     @Autowired
     private LiveChatService service;
 
-    @Autowired
-    private MailService mailService;
-
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor)
             throws MessagingException {
@@ -51,7 +48,6 @@ public class ChatMessageController {
         messagingTemplate.convertAndSendToUser(message.getTo(), "/queue/messages", message);
         messagingTemplate.convertAndSendToUser(sender, "/queue/messages", message);
 
-        mailService.sendEmail(message.getTo(), "notifikasi pesan baru", "<h1> kamu menerima pesan baru </h1>");
     }
 
     @GetMapping("/live-chat/active-admin")

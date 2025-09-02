@@ -16,19 +16,24 @@ public class LiveChatRepository {
     @Autowired
     private NamedParameterJdbcTemplate db;
 
-    @Async
-    public void save(ChatMessage message) {
+    public String save(ChatMessage message) {
         String sql = """
-                insert into live_chat (sender_username, receiver_username, message)
-                values( :sender , :receiver, :message )
+                WITH cmail AS (
+                  INSERT INTO live_chat (sender_username, receiver_username, message)
+                  VALUES (:sender, :receiver, :message)
+                  RETURNING sender_username
+                )
+                SELECT u.email
+                FROM cmail
+                JOIN users u ON u.username = cmail.sender_username;
                 """;
-        MapSqlParameterSource params = new MapSqlParameterSource();
 
-        params.addValue("sender", message.getFrom(), Types.VARCHAR);
-        params.addValue("receiver", message.getTo(), Types.VARCHAR);
-        params.addValue("message", message.getMessage(), Types.VARCHAR);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("sender", message.getFrom(), Types.VARCHAR)
+                .addValue("receiver", message.getTo(), Types.VARCHAR)
+                .addValue("message", message.getMessage(), Types.VARCHAR);
 
-        db.update(sql, params);
-
+        return db.queryForObject(sql, params, String.class);
     }
+
 }
