@@ -19,6 +19,7 @@ import jakarta.mail.MessagingException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ChatMessageController {
@@ -56,6 +57,12 @@ public class ChatMessageController {
         Set<String> onlineAdminData = onlineAdminListener.getActiveAdmins();
         List<BaseUserDataLiveChat> adminData = liveChatService.getOnlineAdmin(onlineAdminData);
         return adminData;
+    }
+
+    @GetMapping("/get-message")
+    @ResponseBody
+    public String getLiveChatFrom(@RequestParam(name = "from") String sender) {
+        return sender;
     }
 
 }

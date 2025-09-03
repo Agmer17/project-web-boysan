@@ -111,11 +111,12 @@ function renderAdminList(admins) {
       return;
     }
 
+
     // bisa pakai template innerHTML biar gampang
     li.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px;">
         <img 
-          src="${admin.imageUrl || '/img/default.jpg'}" 
+          src="${admin.imageUrl ? "/uploads/" + admin.imageUrl : "/img/default.jpg"}"
           alt="${admin.username}" 
           width="32" 
           height="32" 
@@ -128,6 +129,8 @@ function renderAdminList(admins) {
         </div>
       </div>
     `;
+
+    console.log(admin.imageUrl)
 
     list.appendChild(li);
   });

@@ -1,5 +1,7 @@
 package app.model.entity;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,13 +9,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserAuthDetails {
-    private Integer id;
+@AllArgsConstructor
+public class UserProfileData {
     private String username;
-    private String passwordHash;
-    private String role;
     private String fullName;
     private String email;
+    private String profilePicture;
+    private String gender;
+    private LocalDateTime createdAt;
 }

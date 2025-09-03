@@ -38,6 +38,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
         for (Cookie c : request.getCookies()) {
             if ("Credentials".equalsIgnoreCase(c.getName())) {
                 cookie = c.getValue();
+                System.out.println(c.getValue());
             }
         }
 
@@ -48,7 +49,9 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
         try {
             Claims claims = jwtUtil.parseToken(cookie);
+            System.out.println(claims);
             request.getSession(true).setAttribute("claims", claims);
+            System.out.println(claims);
             return true;
         } catch (ExpiredJwtException e) {
             response.sendRedirect("/login");

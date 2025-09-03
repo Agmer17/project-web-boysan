@@ -33,7 +33,7 @@ public class AuthService {
                 throw new AuthCredentialsException("Password yang kamu masukkan salah!", "login");
             }
 
-            responseObj.addCookie(this.generateCookie(details.getUsername(), details.getRole()));
+            responseObj.addCookie(this.generateCookie(details.getUsername(), details.getRole(), details.getId()));
             return true;
 
         } catch (EmptyResultDataAccessException e) {
@@ -58,8 +58,8 @@ public class AuthService {
         }
     }
 
-    private Cookie generateCookie(String username, String role) {
-        Cookie cookie = new Cookie("Credentials", jwtUtil.generateToken(username, role));
+    private Cookie generateCookie(String username, String role, int id) {
+        Cookie cookie = new Cookie("Credentials", jwtUtil.generateToken(username, role, id));
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");

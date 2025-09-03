@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,5 +54,10 @@ public class GlobalException {
         redirect.addFlashAttribute("errorMessage", ex.getMessage());
 
         return "redirect:/sign-in";
+    }
+
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public String emptyResultHandler(EmptyResultDataAccessException e) {
+        return "redirect:/NotFound";
     }
 }
