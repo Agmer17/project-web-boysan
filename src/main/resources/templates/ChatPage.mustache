@@ -50,6 +50,7 @@
             console.log("Berhasil parse JSON:", chatMessage);
             const li = document.createElement("li");
             li.innerText = `from : ${chatMessage.from} ${chatMessage.message}`;
+            console.log(chatMessage.ownMessage)
             document.getElementById("messages").appendChild(li);
         } catch (e) {
             console.error("Gagal parse JSON:", e);

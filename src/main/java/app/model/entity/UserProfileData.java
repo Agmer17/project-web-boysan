@@ -15,6 +15,7 @@ public class UserProfileData {
     private String username;
     private String fullName;
     private String email;
+    private String phoneNumber;
     private String profilePicture;
     private String gender;
     private LocalDateTime createdAt;

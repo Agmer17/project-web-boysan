@@ -41,6 +41,7 @@ public class UserService {
         String imgFileName = null;
 
         if (!img.isEmpty()) {
+            String oldProfilePic = repo.getUserProfile(id).getProfilePicture();
             InputStream stream = img.getInputStream();
             ImageType mediaType = ImageFileVerificator.verifyImageType(stream);
 
@@ -49,14 +50,18 @@ public class UserService {
             }
 
             imgFileName = FileUtils.handleUploads(img, mediaType);
+
+            if (oldProfilePic != null) {
+                FileUtils.deleteImage(oldProfilePic);
+            }
+
         }
 
         // dikasih null supaya gak diupdate. Gua bingung mau diapain lagi mennn
-        UserProfileData data = new UserProfileData(null, updateReq.getFullName(), updateReq.getEmail(), imgFileName,
-                updateReq.getGender(), null);
+        UserProfileData data = new UserProfileData(null, updateReq.getFullName(), updateReq.getEmail(),
+                updateReq.getPhoneNumber(), imgFileName, updateReq.getGender(), null);
 
         UserProfileData result = repo.updateUser(data, id);
-
         return result;
     }
 }

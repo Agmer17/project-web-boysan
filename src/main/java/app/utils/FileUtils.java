@@ -33,4 +33,29 @@ public class FileUtils {
     public static Path getAbsolutePathFromRelative(String relativePath) {
         return Paths.get(relativePath).toAbsolutePath();
     }
+
+    public static boolean deleteImage(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            System.out.println("Nama file tidak boleh kosong");
+            return false;
+        }
+
+        try {
+            Path filePath = Paths.get(UPLOAD_DIR, fileName).normalize();
+
+            // Cek apakah file ada
+            if (!Files.exists(filePath)) {
+                System.out.println("File tidak ditemukan: " + filePath.toAbsolutePath());
+                return false;
+            }
+
+            Files.delete(filePath); // Hapus file
+            System.out.println("File berhasil dihapus: " + filePath.toAbsolutePath());
+            return true;
+
+        } catch (IOException e) {
+            System.out.println("Gagal menghapus file: " + e.getMessage());
+            return false;
+        }
+    }
 }

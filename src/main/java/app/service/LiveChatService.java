@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import app.event.PresenceEventListener;
 import app.model.dto.ChatMessage;
 import app.model.entity.BaseUserDataLiveChat;
 import app.repository.LiveChatRepository;
@@ -25,7 +26,11 @@ public class LiveChatService {
     @Autowired
     private MailService mailService;
 
-    public List<BaseUserDataLiveChat> getOnlineAdmin(Set<String> onlineAdmin) {
+    @Autowired
+    private PresenceEventListener onlineUserListener;
+
+    public List<BaseUserDataLiveChat> getOnlineAdmin() {
+        Set<String> onlineAdmin = onlineUserListener.getActiveAdmins();
         List<BaseUserDataLiveChat> result = userRepo.getAdminData();
 
         List<BaseUserDataLiveChat> onlineAdminData = result.stream()
@@ -68,7 +73,10 @@ public class LiveChatService {
                 .formatted(message.getFrom(), message.getMessage());
 
         String receiverEmail = chatRepo.save(message);
-        mailService.sendEmail(receiverEmail, "notifikasi pesan baru", htmlEmailText);
+
+        if (!onlineUserListener.isUserOnline(message.getTo())) {
+            mailService.sendEmail(receiverEmail, "notifikasi pesan baru", htmlEmailText);
+        }
 
         return;
 

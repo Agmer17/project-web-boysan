@@ -28,5 +28,9 @@ public class UpdateUserProfileRequest {
     @Pattern(regexp = "pria|wanita|lainnya")
     private String gender;
 
+    @NotBlank
+    @Pattern(regexp = "\\+?\\d{10,15}", message = "Nomor telepon tidak valid")
+    private String phoneNumber;
+
     private MultipartFile profilePicture;
 }

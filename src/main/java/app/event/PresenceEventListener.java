@@ -1,7 +1,9 @@
 package app.event;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -12,7 +14,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Component
 public class PresenceEventListener {
 
-    private final Set<String> activeAdmins = ConcurrentHashMap.newKeySet();
+    private final Map<String, String> activeUser = new ConcurrentHashMap<>();
 
     @EventListener
     public void handleSessionConnected(SessionConnectEvent event) {
@@ -21,12 +23,9 @@ public class PresenceEventListener {
         String username = (String) accessor.getSessionAttributes().get("username");
         String role = (String) accessor.getSessionAttributes().get("role");
 
-        if (username != null && "admin".equals(role)) {
-            activeAdmins.add(username);
-            System.out.println("Admin online: " + username);
+        if (username != null && role != null) {
+            activeUser.put(username, role);
         }
-
-        // System.out.println(activeAdmins);
     }
 
     @EventListener
@@ -34,19 +33,24 @@ public class PresenceEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) accessor.getSessionAttributes().get("username");
-        String role = (String) accessor.getSessionAttributes().get("role");
 
-        if (username != null && isAdmin(role)) {
-            activeAdmins.remove(username);
+        if (username != null) {
+            activeUser.remove(username);
         }
     }
 
     public Set<String> getActiveAdmins() {
-        return activeAdmins;
+        return activeUser.entrySet().stream()
+                .filter(entry -> isAdmin(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    public boolean isUserOnline(String username) {
+        return activeUser.containsKey(username);
     }
 
     private boolean isAdmin(String role) {
-        // cek dari database / JWT claim / prefix
-        return role.equalsIgnoreCase("admin");
+        return "admin".equalsIgnoreCase(role);
     }
 }

@@ -54,14 +54,14 @@ public class AuthService {
             boolean isSuccess = repo.save(username, password, fullName, email);
             return isSuccess;
         } catch (DuplicateKeyException e) {
-            throw new DuplicateKeyException("akun sudah terdaftar! Harap login terlebih dahulu");
+            throw new DuplicateKeyException("akun sudah terdaftar!");
         }
     }
 
     private Cookie generateCookie(String username, String role, int id) {
         Cookie cookie = new Cookie("Credentials", jwtUtil.generateToken(username, role, id));
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60 * 24 * 7);
         return cookie;

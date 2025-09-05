@@ -22,6 +22,7 @@
             <p><strong>Username:</strong> {{user.username}}</p>
             <p><strong>Full Name:</strong> {{user.fullName}}</p>
             <p><strong>Email:</strong> {{user.email}}</p>
+            <p><strong>phone number : {{user.phoneNumber}}</strong></p>
             <p><strong>Gender:</strong> {{user.gender}}</p>
             <p><strong>Joined:</strong> {{user.createdAt}}</p>
         </div>
@@ -41,6 +42,10 @@
             <div>
                 <label for="email"><strong>Email:</strong></label>
                 <input type="email" id="email" name="email" value="{{user.email}}" required>
+            </div>
+            <div>
+                <label for="phoneNumber"><strong>nomer telepon:</strong></label>
+                <input type="text" id="phoneNumber" name="phoneNumber" value="{{user.phoneNumber}}" required>
             </div>
 
             <div>

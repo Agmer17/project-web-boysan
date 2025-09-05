@@ -69,11 +69,26 @@ public class UserRepository {
 
     public UserProfileData getUserProfile(String username) {
         String sql = """
-                select username, full_name, email, profile_picture, created_at, gender
+                select username, full_name, email, profile_picture, created_at, gender,
+                phone_number
                 from users
                 where username = :username
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("username", username, Types.VARCHAR);
+
+        UserProfileData rs = db.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserProfileData.class));
+
+        return rs;
+    }
+
+    public UserProfileData getUserProfile(int id) {
+        String sql = """
+                select username, full_name, email, profile_picture, created_at, gender,
+                phone_number
+                from users
+                where id = :id
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", id, Types.BIGINT);
 
         UserProfileData rs = db.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserProfileData.class));
 
@@ -104,7 +119,11 @@ public class UserRepository {
             params.addValue("profile_picture", data.getProfilePicture(), Types.VARCHAR);
         }
 
-        // hapus koma terakhir
+        if (isValidStringUpdate(data.getPhoneNumber())) {
+            sql.append("phone_number = :phone, ");
+            params.addValue("phone", data.getPhoneNumber(), Types.VARCHAR);
+        }
+
         int lastComma = sql.lastIndexOf(",");
         if (lastComma != -1) {
             sql.deleteCharAt(lastComma);
@@ -113,9 +132,6 @@ public class UserRepository {
         sql.append(
                 " WHERE id = :id returning username, full_name, email, profile_picture, created_at, gender, created_at");
         params.addValue("id", id, Types.BIGINT);
-
-        // System.out.println("SQL: " + sql);
-        // System.out.println("Params: " + params.getValues());
 
         UserProfileData result = db.queryForObject(sql.toString(), params,
                 new BeanPropertyRowMapper<>(UserProfileData.class));
