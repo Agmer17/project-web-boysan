@@ -9,9 +9,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import app.model.entity.BaseUserDataLiveChat;
-import app.model.entity.UserAuthDetails;
-import app.model.entity.UserProfileData;
+import app.model.pojo.BaseUserDataLiveChat;
+import app.model.pojo.UserAuthDetails;
+import app.model.pojo.UserProfileData;
 
 @Repository
 public class UserRepository {

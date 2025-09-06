@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import app.middleware.AdminAuthenticationInterceptor;
 import app.middleware.JwtAuthInterceptor;
 
 @Configuration
@@ -15,10 +16,14 @@ public class SpringWebConfig implements WebMvcConfigurer {
     @Autowired
     private JwtAuthInterceptor jwtInterceptor;
 
+    @Autowired
+    private AdminAuthenticationInterceptor adminAuthenticationInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtInterceptor).addPathPatterns(
-                "/live-chat/**", "/user/**");
+        registry.addInterceptor(jwtInterceptor).addPathPatterns("/**").excludePathPatterns(
+                "/", "/home", "/login", "/sign-in", "/auth/**", "/NotFound");
+        registry.addInterceptor(adminAuthenticationInterceptor).addPathPatterns("/admin/**");
     }
 
     @Override

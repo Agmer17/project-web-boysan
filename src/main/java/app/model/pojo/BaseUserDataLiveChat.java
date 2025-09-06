@@ -1,4 +1,4 @@
-package app.model.entity;
+package app.model.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

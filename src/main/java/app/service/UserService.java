@@ -2,22 +2,20 @@ package app.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.http.HttpRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import app.model.dto.UpdateUserProfileRequest;
-import app.model.entity.UserProfileData;
 import app.model.exception.InvalidFileType;
+import app.model.pojo.UserProfileData;
 import app.repository.UserRepository;
 import app.utils.FileUtils;
 import app.utils.ImageFileVerificator;
 import app.utils.ImageFileVerificator.ImageType;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 @Service
 public class UserService {

@@ -18,7 +18,8 @@ public class GlobalException {
     @ExceptionHandler(PostsDataNotValidException.class)
     public String handleValidationExceptions(PostsDataNotValidException ex, RedirectAttributes redirectAttributes) {
 
-        System.out.println(">>> GlobalException KE-TRIGGER"); // cek log
+        System.out.println(ex);
+
         if (ex.getResult() != null) {
             Map<String, String> errors = ex.getResult().getFieldErrors().stream()
                     .collect(Collectors.toMap(
@@ -31,7 +32,10 @@ public class GlobalException {
 
         redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
 
+        System.out.println(redirectAttributes);
+
         if (ex.getPage() != null) {
+            System.out.println("redirect:/" + ex.getPage());
             return "redirect:/" + ex.getPage();
         } else {
             return "redirect:/home"; // nanti benerin ini

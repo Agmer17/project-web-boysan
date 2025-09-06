@@ -1,7 +1,5 @@
 package app.model.dto;
 
-import java.time.LocalDateTime;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.Email;
@@ -17,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateUserProfileRequest {
     @NotBlank(message = "Full name tidak boleh kosong")
-    @Size(max = 100, message = "Full name maksimal 100 karakter")
+    @Size(max = 100, message = "Full name maksimal 100 karakter", min = 5)
     private String fullName;
 
     @NotBlank(message = "Email tidak boleh kosong")

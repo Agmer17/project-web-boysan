@@ -9,8 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import app.model.dto.SignInRequest;
-import app.model.entity.UserAuthDetails;
 import app.model.exception.AuthCredentialsException;
+import app.model.pojo.UserAuthDetails;
 import app.repository.UserRepository;
 import app.utils.JwtUtils;
 import jakarta.servlet.http.Cookie;

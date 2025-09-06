@@ -1,147 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Spring WebSocket Private Chat</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-</head>
-<body>
-  <h2>Private Chat Test</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Chat & Active Admins</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      h2 {
+        margin-top: 30px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+      }
+      .chat-info,
+      .admin-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-user,
+      .admin-user {
+        font-weight: bold;
+      }
+      .chat-message {
+        font-size: 0.9em;
+        color: #555;
+      }
+      .chat-time,
+      .admin-status {
+        font-size: 0.8em;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Last Chats</h2>
+    <ul id="chat-list"></ul>
 
-  <h1>{{username}}</h1>
-  <h1>{{session}}</h1>
+    <h2>Active Admins</h2>
+    <ul id="admin-list"></ul>
 
-  <div>
-    <label>Send To (username):</label>
-    <input type="text" id="toUser" placeholder="e.g. admin">
-  </div>
+    <div id="messageHistory"></div>
 
-  <h2>Active Admins</h2>
-  <ul id="admin-list"></ul>
+    <script>
+      const username = "{{username}}";
 
-  <div>
-    <label>Message:</label>
-    <input type="text" id="messageInput" placeholder="Your message...">
-  </div>
-
-  <button onclick="sendPrivateMessage()">Send</button>
-
-  <h3>Received Messages:</h3>
-  <ul id="messages"></ul>
-
-  <script>
-    let stompClient = null;
-    let username = "{{username}}"
-
-    function connect() {
-      const socket = new SockJS('/ws'); 
-      stompClient = Stomp.over(socket);
-
-      stompClient.connect({}, function(frame) {
-        console.log('Connected: ' + frame);
-
-          stompClient.subscribe("/user/{{username}}/queue/messages", function(messageFrame) {
-          console.log("Pesan Diterima:");
-          console.log(messageFrame); 
-          console.log("Isi pesan (body): " + messageFrame.body); 
+      async function fetchLastChats() {
         try {
-            const chatMessage = JSON.parse(messageFrame.body);
-            console.log("Berhasil parse JSON:", chatMessage);
-            const li = document.createElement("li");
-            li.innerText = `from : ${chatMessage.from} ${chatMessage.message}`;
-            console.log(chatMessage.ownMessage)
-            document.getElementById("messages").appendChild(li);
-        } catch (e) {
-            console.error("Gagal parse JSON:", e);
-            console.log("Isi body yang gagal diparse:", messageFrame.body);
-        }
-            });
+          const res = await fetch("/live-chat/latest", {
+            method: "GET",
+            credentials: "include",
           });
-    }
+          if (!res.ok) throw new Error("HTTP error! status: " + res.status);
+          const data = await res.json();
+          renderChatList(data);
+        } catch (err) {
+          console.error("Failed to fetch last chats:", err);
+        }
+      }
 
-    function sendPrivateMessage() {
-    const toUser = document.getElementById("toUser").value;
-    const messageContent = document.getElementById("messageInput").value;
+      function renderChatList(chats) {
+        const ul = document.getElementById("chat-list");
+        ul.innerHTML = "";
+        if (chats.length === 0) {
+          ul.innerHTML = "<li>No chats yet</li>";
+          return;
+        }
 
-    if (stompClient && toUser && messageContent) {
-        const chatMessage = {
-            to: toUser,
-            message: messageContent,
-            ownMessage : true
-        };
+        chats.forEach((chat) => {
+          const li = document.createElement("li");
+          console.log(chat);
 
-        console.log("Mengirim pesan:", chatMessage);
-        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-    }
-}
+          const img = document.createElement("img");
+          img.src = chat.profile_picture
+            ? "/uploads/" + chat.profile_picture
+            : "/img/default.jpg";
+          img.alt = chat.username;
 
-async function getActiveAdmins() {
-  try {
-    const response = await fetch("/live-chat/active-admin", {
-      method: "GET",
-      credentials: "include" // penting: biar cookie otomatis ikut
-    });
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "chat-info";
 
-    if (!response.ok) {
-      throw new Error("HTTP error! status: " + response.status);
-    }
+          const userDiv = document.createElement("div");
+          userDiv.className = "chat-user";
+          userDiv.innerHTML = `${chat.fullName} <small>@${chat.username} • ${chat.role}</small>`;
 
-    const admins = await response.json(); 
-    console.log("Active admins:", admins);
+          const messageDiv = document.createElement("div");
+          messageDiv.className = "chat-message";
+          messageDiv.textContent = chat.message;
 
-    renderAdminList(admins);
-  } catch (err) {
-    console.error("Failed to fetch active admins:", err);
-  }
-}
+          const timeDiv = document.createElement("div");
+          timeDiv.className = "chat-time";
+          timeDiv.textContent = new Date(chat.createdAt).toLocaleString();
 
-function renderAdminList(admins) {
-  const list = document.getElementById("admin-list");
-  list.innerHTML = ""; // reset isi dulu
+          infoDiv.appendChild(userDiv);
+          infoDiv.appendChild(messageDiv);
+          infoDiv.appendChild(timeDiv);
 
-  if (admins.length === 0) {
-    list.innerHTML = "<li>No admins online</li>";
-    return;
-  }
+          li.appendChild(img);
+          li.appendChild(infoDiv);
+          ul.appendChild(li);
 
-  admins.forEach(admin => {
-    const li = document.createElement("li");
+          li.addEventListener("click", async () => {
+            try {
+              const res = await fetch(
+                `/live-chat/message?with=${encodeURIComponent(chat.username)}`
+              );
+              if (!res.ok) throw new Error("Gagal ambil data");
+              const messages = await res.json();
 
-    if (admin.username === username) {
-      return;
-    }
+              const historyDiv = document.getElementById("messageHistory");
+              historyDiv.innerHTML = ""; // clear sebelumnya
 
+              messages.forEach((msg) => {
+                const bubble = document.createElement("div");
+                bubble.className =
+                  msg.ownMessage
+                    ? "bubble own" // styling untuk pesan sendiri
+                    : "bubble other"; // styling untuk pesan lawan
 
-    // bisa pakai template innerHTML biar gampang
-    li.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <img 
-          src="${admin.imageUrl ? "/uploads/" + admin.imageUrl : "/img/default.jpg"}"
-          alt="${admin.username}" 
-          width="32" 
-          height="32" 
-          style="border-radius:50%; object-fit:cover;"
-        />
-        <div>
-          <strong>${admin.fullName}</strong> <br/>
-          <small>@${admin.username} • ${admin.role}</small>
-          <small>online ${admin.online}</small>
-        </div>
-      </div>
-    `;
+                // kalau mau tampil foto lawan bicara (hanya untuk pesan 'other')
+                if (!msg.ownMessage) {
+                  const avatar = document.createElement("img");
+                  avatar.src = msg.otherProfilePicture
+                    ? "/uploads/" + msg.otherProfilePicture
+                    : "/img/default.jpg";
+                  avatar.alt = msg.otherUsername;
+                  avatar.className = "avatar";
+                  bubble.appendChild(avatar);
+                }
 
-    console.log(admin.imageUrl)
+                const text = document.createElement("span");
+                text.textContent = msg.message;
 
-    list.appendChild(li);
-  });
-}
+                bubble.appendChild(text);
+                historyDiv.appendChild(bubble);
+              });
+            } catch (err) {
+              console.error(err);
+            }
+          });
+        });
+      }
 
+      // --- Fetch active admins ---
+      async function fetchActiveAdmins() {
+        try {
+          const res = await fetch("/live-chat/active-admin", {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error("HTTP error! status: " + res.status);
+          const data = await res.json();
+          renderAdminList(data);
+        } catch (err) {
+          console.error("Failed to fetch active admins:", err);
+        }
+      }
 
-    connect();
-    getActiveAdmins();
+      function renderAdminList(admins) {
+        const ul = document.getElementById("admin-list");
+        ul.innerHTML = "";
+        if (admins.length === 0) {
+          ul.innerHTML = "<li>No admins online</li>";
+          return;
+        }
 
-    setInterval(() => getActiveAdmins(), 10000);
-  </script>
-</body>
+        admins.forEach((admin) => {
+          if (admin.username === username) return; // skip self
+          const li = document.createElement("li");
+
+          const img = document.createElement("img");
+          img.src = admin.imageUrl
+            ? "/uploads/" + admin.imageUrl
+            : "/img/default.jpg";
+          img.alt = admin.username;
+
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "admin-info";
+
+          const userDiv = document.createElement("div");
+          userDiv.className = "admin-user";
+          userDiv.innerHTML = `${admin.fullName} <small>@${admin.username} • ${admin.role}</small>`;
+
+          const statusDiv = document.createElement("div");
+          statusDiv.className = "admin-status";
+          statusDiv.textContent = `online ${admin.online}`;
+
+          infoDiv.appendChild(userDiv);
+          infoDiv.appendChild(statusDiv);
+
+          li.appendChild(img);
+          li.appendChild(infoDiv);
+          ul.appendChild(li);
+        });
+      }
+
+      // --- Initial fetch & auto-refresh ---
+      fetchLastChats();
+      fetchActiveAdmins();
+      setInterval(() => {
+        fetchActiveAdmins();
+      }, 10000);
+    </script>
+  </body>
 </html>

@@ -10,12 +10,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import app.model.dto.ChatMessage;
-import app.model.entity.BaseUserDataLiveChat;
+import app.model.pojo.BaseUserDataLiveChat;
+import app.model.pojo.LatestChatEntity;
+import app.model.pojo.LiveChatHistoryData;
 import app.service.LiveChatService;
+import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -51,10 +55,28 @@ public class ChatMessageController {
         return adminData;
     }
 
-    @GetMapping("/get-message")
+    @GetMapping("/live-chat/latest")
     @ResponseBody
-    public String getLiveChatFrom(@RequestParam(name = "from") String sender) {
-        return sender;
+    public List<LatestChatEntity> getLatestChat(@SessionAttribute(name = "claims", required = true) Claims claims) {
+        String currentUsername = claims.get("username", String.class);
+
+        System.out.println("\n\n\n\n\n" + currentUsername + "\n\n\n\n\n\n\n\n\n");
+
+        List<LatestChatEntity> latestChat = service.getLatestChat(currentUsername);
+
+        return latestChat;
+    }
+
+    @GetMapping("/live-chat/message")
+    @ResponseBody
+    public List<LiveChatHistoryData> getChatHistory(@RequestParam("with") String withUser,
+            @SessionAttribute(required = true) Claims claims) {
+
+        String currentUser = claims.get("username", String.class);
+
+        List<LiveChatHistoryData> result = service.getChatFrom(currentUser, withUser);
+
+        return result;
     }
 
 }

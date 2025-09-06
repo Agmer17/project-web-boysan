@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import app.event.PresenceEventListener;
 import app.model.dto.ChatMessage;
-import app.model.entity.BaseUserDataLiveChat;
+import app.model.pojo.BaseUserDataLiveChat;
+import app.model.pojo.LatestChatEntity;
+import app.model.pojo.LiveChatHistoryData;
 import app.repository.LiveChatRepository;
 import app.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -80,6 +82,19 @@ public class LiveChatService {
 
         return;
 
+    }
+
+    public List<LatestChatEntity> getLatestChat(String username) {
+        List<LatestChatEntity> lastChat = chatRepo.getLastMessage(username);
+
+        return lastChat;
+    }
+
+    public List<LiveChatHistoryData> getChatFrom(String currentUser, String withUser) {
+
+        List<LiveChatHistoryData> chatHistory = chatRepo.getChatHistory(currentUser, withUser);
+
+        return chatHistory;
     }
 
 }
