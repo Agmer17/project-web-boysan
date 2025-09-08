@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Product</title>
+  </head>
+  <body>
+    <h1>Unggah Produk Baru</h1>
+    <form id="productForm" enctype="multipart/form-data">
+      <div>
+        <label for="categoryId">Kategori ID:</label>
+        <input type="text" id="categoryId" name="categoryId" required />
+      </div>
+      <div>
+        <label for="name">Nama Produk:</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div>
+        <label for="images">Gambar Produk:</label>
+        <input type="file" id="images" name="images" multiple />
+      </div>
+
+      <div id="preview"></div>
+
+      <button type="submit">Unggah Produk</button>
+    </form>
+
+    <script>
+      const form = document.getElementById("productForm");
+      const imagesInput = document.getElementById("images");
+      const previewDiv = document.getElementById("preview");
+
+      // Array global untuk simpan semua file
+      let allFiles = [];
+
+      // tiap kali user pilih file
+      imagesInput.addEventListener("change", () => {
+        // simpan file ke array global
+        allFiles.push(...imagesInput.files);
+
+        // reset input supaya bisa pilih lagi tanpa overwrite
+        imagesInput.value = "";
+
+        // render ulang preview
+        previewDiv.innerHTML = "";
+        allFiles.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.width = 100;
+            img.style.display = "block";
+            img.style.margin = "5px 0";
+            previewDiv.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      // submit
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append(
+          "categoryId",
+          document.getElementById("categoryId").value
+        );
+        formData.append("name", document.getElementById("name").value);
+
+        // loop semua file yang tersimpan di array
+        allFiles.forEach((file) => {
+          formData.append("images", file);
+        });
+
+        // DEBUG: cek isi FormData
+        for (let [k, v] of formData.entries()) {
+          console.log(k, v);
+        }
+
+        // kirim ke backend
+        const response = await fetch("/admin/products/add", {
+          method: "POST",
+          body: formData,
+        });
+        console.log(await response.text());
+      });
+    </script>
+  </body>
+</html>

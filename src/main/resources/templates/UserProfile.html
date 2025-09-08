@@ -1,11 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{username}}</title>
-</head>
-<body>
-    
-</body>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{user.username}} - profile's</title>
+  </head>
+  <body>
+    <h1>Profil Pengguna</h1>
+
+    <div>
+      <img
+        src="/uploads/{{user.profilePicture}}"
+        alt="Foto Profil"
+        width="150"
+        height="150"
+      />
+      <p><strong>Username:</strong> {{user.username}}</p>
+      <p><strong>Nama Lengkap:</strong> {{user.fullName}}</p>
+      <p><strong>Email:</strong> {{user.email}}</p>
+      <p><strong>Nomor Telepon:</strong> {{user.phoneNumber}}</p>
+      <p><strong>Jenis Kelamin:</strong> {{user.gender}}</p>
+      <p><strong>Bergabung Sejak:</strong> {{user.createdAt}}</p>
+    </div>
+
+    <hr />
+
+    <h2>Ubah Data Profil</h2>
+
+    <form action="/user/me/update" method="post" enctype="multipart/form-data">
+      <div>
+        <label for="fullName">Nama Lengkap:</label><br />
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          value="{{user.fullName}}"
+          minlength="5"
+          maxlength="100"
+          required
+        />
+        {{#validationErrors.fullName}}
+        <p><i>{{validationErrors.fullName}}</i></p>
+        {{/validationErrors.fullName}}
+      </div>
+      <br />
+      <div>
+        <label for="email">Email:</label><br />
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{user.email}}"
+          required
+        />
+        {{#validationErrors.email}}
+        <p><i>{{validationErrors.email}}</i></p>
+        {{/validationErrors.email}}
+      </div>
+      <br />
+      <div>
+        <label for="gender">Jenis Kelamin:</label><br />
+        <select id="gender" name="gender" required>
+          <option value="pria">Pria</option>
+          <option value="wanita">Wanita</option>
+          <option value="lainnya">Lainnya</option>
+        </select>
+        {{#validationErrors.gender}}
+        <p><i>{{validationErrors.gender}}</i></p>
+        {{/validationErrors.gender}}
+      </div>
+      <br />
+      <div>
+        <label for="phoneNumber">Nomor Telepon:</label><br />
+        <input
+          type="tel"
+          id="phoneNumber"
+          name="phoneNumber"
+          value="{{user.phoneNumber}}"
+          pattern="[0-9+]{10,15}"
+          required
+        />
+        {{#validationErrors.phoneNumber}}
+        <p><i>{{validationErrors.phoneNumber}}</i></p>
+        {{/validationErrors.phoneNumber}}
+      </div>
+      <br />
+      <div>
+        <label for="profilePicture">Foto Profil:</label><br />
+        <input
+          type="file"
+          id="profilePicture"
+          name="profilePicture"
+          accept="image/*"
+        />
+        <p><i>{{fileTypeErrors}}</i></p>
+      </div>
+      <br />
+      <button type="submit">Simpan Perubahan</button>
+
+      <h1>{{errorMessage}}</h1>
+    </form>
+  </body>
 </html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignIn</title>
+  </head>
+  <body>
+    <h1>Sign in</h1>
+
+    <h2>{{errorMessage}}</h2>
+
+    <form action="/auth/sign-in" method="post">
+      <label for="username">username</label>
+      <input
+        type="text"
+        name="username"
+        id="userame"
+        value="{{formData.username}}"
+      />
+      {{#validationErrors.username}}
+      <p>{{.}}</p>
+      {{/validationErrors.username}}
+
+      <label for="fullName">fullName</label>
+      <input
+        type="text"
+        name="fullName"
+        id="fullName"
+        value="{{formData.fullName}}"
+      />
+      {{#validationErrors.fullName}}
+      <p>{{.}}</p>
+      {{/validationErrors.fullName}}
+
+      <label for="email">email</label>
+      <input type="email" name="email" id="email" value="{{formData.email}}" />
+      {{#validationErrors.email}}
+      <p>{{.}}</p>
+      {{/validationErrors.email}}
+
+      <label for="password">password</label>
+      <input
+        type="password"
+        name="password"
+        id="userame"
+        value="{{formData.password}}"
+      />
+      {{#validationErrors.password}}
+      <p>{{.}}</p>
+      {{/validationErrors.password}}
+
+      <button type="submit">sign in</button>
+    </form>
+  </body>
+</html>

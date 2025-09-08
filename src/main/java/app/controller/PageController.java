@@ -49,4 +49,9 @@ public class PageController {
         return "AdminProduct";
     }
 
+    @GetMapping("/errors")
+    public String errorPage(Model model) {
+        return "error/Errors";
+    }
+
 }

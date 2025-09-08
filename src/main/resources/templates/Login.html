@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <h1>login</h1>
+
+    {{#errorMessage}}
+    <h2>{{.}}</h2>
+    {{/errorMessage}}
+
+    <form action="/auth/login" method="post">
+      <label for="username">username</label>
+      <input
+        type="text"
+        name="username"
+        id="userame"
+        value="{{formData.username}}"
+      />
+      {{#validationErrors.username}}
+      <p>{{.}}</p>
+      {{/validationErrors.username}}
+      <label for="password">password</label>
+      <input
+        type="password"
+        name="password"
+        id="userame"
+        value="{{formData.password}}"
+      />
+      {{#validationErrors.password}}
+      <p>{{.}}</p>
+      {{/validationErrors.password}}
+
+      <button type="submit">Login</button>
+    </form>
+  </body>
+</html>

@@ -9,10 +9,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class UpdateUserProfileRequest {
     @NotBlank(message = "Full name tidak boleh kosong")
     @Size(max = 100, message = "Full name maksimal 100 karakter", min = 5)

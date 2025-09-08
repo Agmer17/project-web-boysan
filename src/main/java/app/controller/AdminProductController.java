@@ -1,31 +1,48 @@
 package app.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
+import app.model.dto.NewServiceProduct;
+import app.model.pojo.BaseServiceProduct;
 import app.model.pojo.ProductEntity;
 import app.service.ProductService;
+import io.jsonwebtoken.Claims;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping(value = "/admin/products")
-@RestController
 public class AdminProductController {
     @Autowired
     private ProductService productService;
 
+    @GetMapping("/")
+    public String getProductPage(@SessionAttribute(required = true) Claims claims, Model model) {
+        String adminUsername = claims.get("username", String.class);
+
+        model.addAttribute("currentAdmin", adminUsername);
+
+        return "NewProduct";
+    }
+
     @GetMapping("/all-products")
+    @ResponseBody
     public List<ProductEntity> getAllProducts() {
         List<ProductEntity> allProducts = productService.getAllProducts();
 
@@ -33,16 +50,19 @@ public class AdminProductController {
     }
 
     @GetMapping("/items/{id}")
+    @ResponseBody
     public ProductEntity getSpecificProduct(@PathVariable UUID id) {
         return productService.findById(id.toString());
     }
 
     @PostMapping("/add")
-    public String addNewProduct(@RequestBody String entity) {
-        return entity;
+    @ResponseBody
+    public BaseServiceProduct addNewProduct(@Valid @ModelAttribute NewServiceProduct newProduct) throws IOException {
+        return productService.addNewProduct(newProduct);
     }
 
     @PatchMapping("/edit/{id}")
+    @ResponseBody
     public String editProducts(@PathVariable String id) {
         return null;
     }
