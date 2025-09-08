@@ -6,15 +6,23 @@ public class PostsDataNotValidException extends RuntimeException {
 
     private final BindingResult result;
     private final String page;
+    private final String message;
 
     public PostsDataNotValidException(String message) {
-        super(message);
+        this.message = message;
         this.result = null;
         this.page = null;
     }
 
     public PostsDataNotValidException(BindingResult validationResult, String fromPage, String message) {
+        this.message = message;
         this.result = validationResult;
+        this.page = fromPage;
+    }
+
+    public PostsDataNotValidException(String message, String fromPage) {
+        this.message = message;
+        this.result = null;
         this.page = fromPage;
     }
 
@@ -24,5 +32,10 @@ public class PostsDataNotValidException extends RuntimeException {
 
     public String getPage() {
         return this.page;
+    }
+
+    @Override
+    public String getMessage() {
+        return this.message;
     }
 }

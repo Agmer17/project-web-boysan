@@ -41,8 +41,12 @@ public class PageController {
         String username = jwtUtil.getUsernameFromCookie(request);
 
         model.addAttribute("username", username);
-        model.addAttribute("session", session.getAttribute("claims"));
         return "ChatPage";
+    }
+
+    @GetMapping("/admin/")
+    public String getAdminPage() {
+        return "AdminProduct";
     }
 
 }

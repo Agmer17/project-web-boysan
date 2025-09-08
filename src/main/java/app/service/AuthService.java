@@ -51,10 +51,10 @@ public class AuthService {
         String password = passwordEncoder.encode(request.getPassword());
 
         try {
-            boolean isSuccess = repo.save(username, password, fullName, email);
-            return isSuccess;
+            return repo.save(username, password, fullName, email);
+
         } catch (DuplicateKeyException e) {
-            throw new DuplicateKeyException("akun sudah terdaftar!");
+            throw new AuthCredentialsException("akun sudah terdaftar!", "sign-in");
         }
     }
 

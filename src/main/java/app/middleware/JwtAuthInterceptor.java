@@ -44,14 +44,13 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
         if (cookie == null || cookie.isEmpty() || cookie.isBlank()) {
             response.sendRedirect("/login");
+            response.setStatus(401);
             return false;
         }
 
         try {
             Claims claims = jwtUtil.parseToken(cookie);
-            System.out.println(claims);
             request.getSession(true).setAttribute("claims", claims);
-            System.out.println(claims);
             return true;
         } catch (ExpiredJwtException e) {
             response.sendRedirect("/login");

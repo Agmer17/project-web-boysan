@@ -1,11 +1,12 @@
 package app.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import app.model.pojo.ProductEntity;
 import app.service.ProductService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping(value = "/admin/products")
+@RestController
 public class AdminProductController {
     @Autowired
     private ProductService productService;
@@ -31,8 +33,8 @@ public class AdminProductController {
     }
 
     @GetMapping("/items/{id}")
-    public ProductEntity getSpecificProduct(@PathVariable String id) {
-        return productService.findById(id);
+    public ProductEntity getSpecificProduct(@PathVariable UUID id) {
+        return productService.findById(id.toString());
     }
 
     @PostMapping("/add")

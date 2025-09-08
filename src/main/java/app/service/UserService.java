@@ -8,14 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import app.model.dto.UpdateUserProfileRequest;
+import app.model.exception.AuthCredentialsException;
 import app.model.exception.InvalidFileType;
+import app.model.exception.PostsDataNotValidException;
 import app.model.pojo.UserProfileData;
 import app.repository.UserRepository;
 import app.utils.FileUtils;
 import app.utils.ImageFileVerificator;
 import app.utils.ImageFileVerificator.ImageType;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class UserService {
@@ -27,39 +28,45 @@ public class UserService {
         return repo.getUserProfile(username);
     }
 
-    public UserProfileData updateUserData(UpdateUserProfileRequest updateReq, HttpServletRequest request)
-            throws IOException {
-        MultipartFile img = updateReq.getProfilePicture();
-        Claims claims = (Claims) request.getSession(false).getAttribute("claims");
-
-        System.out.println(claims);
-
+    public void updateUserData(UpdateUserProfileRequest updateReq, Claims claims) {
         int id = claims.get("id", Integer.class);
+        String currentUsername = claims.get("username", String.class);
 
-        String imgFileName = null;
+        UserProfileData oldData = repo.getUserProfile(currentUsername);
+        MultipartFile img = updateReq.getProfilePicture();
 
-        if (!img.isEmpty()) {
-            String oldProfilePic = repo.getUserProfile(id).getProfilePicture();
-            InputStream stream = img.getInputStream();
-            ImageType mediaType = ImageFileVerificator.verifyImageType(stream);
+        if (oldData.getEmail() != updateReq.getEmail()) {
 
-            if (mediaType == ImageType.UNKNOWN) {
-                throw new InvalidFileType("File gambar tidak valid! harap upload png, webp, jpg dan gif");
+            if (repo.existByEmail(updateReq.getEmail())) {
+                // todo bikin exception sendiri buat pas update data
+                throw new AuthCredentialsException("Data email sudah ada!", "user/my-profile");
             }
-
-            imgFileName = FileUtils.handleUploads(img, mediaType);
-
-            if (oldProfilePic != null) {
-                FileUtils.deleteImage(oldProfilePic);
-            }
-
         }
 
-        // dikasih null supaya gak diupdate. Gua bingung mau diapain lagi mennn
+        String imgFileName = null;
+        try {
+            if (!img.isEmpty()) {
+                String oldProfilePic = repo.getUserProfile(id).getProfilePicture();
+                InputStream stream = img.getInputStream();
+                ImageType mediaType = ImageFileVerificator.verifyImageType(stream);
+
+                if (mediaType == ImageType.UNKNOWN) {
+                    throw new InvalidFileType("File gambar tidak valid! harap upload png, webp, jpg dan gif");
+                }
+
+                imgFileName = FileUtils.handleUploads(img, mediaType);
+
+                if (oldProfilePic != null) {
+                    FileUtils.deleteImage(oldProfilePic);
+                }
+            }
+        } catch (IOException e) {
+            throw new PostsDataNotValidException("data yang kamu kirimkan tidak valid", "user/my-profile");
+        }
+
         UserProfileData data = new UserProfileData(null, updateReq.getFullName(), updateReq.getEmail(),
                 updateReq.getPhoneNumber(), imgFileName, updateReq.getGender(), null);
 
-        UserProfileData result = repo.updateUser(data, id);
-        return result;
+        repo.updateUser(data, id);
     }
 }

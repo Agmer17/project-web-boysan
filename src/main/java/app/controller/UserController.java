@@ -1,16 +1,13 @@
 package app.controller;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import app.model.dto.UpdateUserProfileRequest;
 import app.model.exception.PostsDataNotValidException;
@@ -18,7 +15,6 @@ import app.model.pojo.UserProfileData;
 import app.service.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,9 +29,8 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/my-profile")
-    public String getMyProfile(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        Claims claims = (Claims) session.getAttribute("claims");
+    public String getMyProfile(Model model, HttpServletRequest request, @SessionAttribute Claims claims) {
+
         String username = claims.get("username", String.class);
 
         UserProfileData user = userService.getCurrentUserData(username);
@@ -46,14 +41,12 @@ public class UserController {
 
     @PostMapping("/me/update")
     public String updateMyProfile(@Valid @ModelAttribute UpdateUserProfileRequest update,
-            BindingResult bindingResult,
-            HttpServletRequest request)
+            BindingResult bindingResult, @SessionAttribute Claims claims)
             throws IOException {
 
         if (bindingResult.hasErrors()) {
             throw new PostsDataNotValidException(bindingResult, "user/my-profile", "data yang kamu masukkan gak valid");
         }
-        UserProfileData newData = userService.updateUserData(update, request);
         return "redirect:/user/my-profile";
     }
 

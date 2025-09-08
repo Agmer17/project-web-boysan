@@ -55,7 +55,7 @@ public class AuthController {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
-        return "redirect:/home";
+        return "redirect:/login";
     }
 
     @PostMapping("/sign-in")
@@ -65,11 +65,7 @@ public class AuthController {
             throw new PostsDataNotValidException(result, "sign-in", "data yang kamu masukkan gak valid!");
         }
 
-        if (svc.signInServcie(request)) {
-            return "redirect:/login";
-        }
-
-        return "redirect:/sign-in";
+        return "redirect:/login";
     }
 
 }

@@ -22,7 +22,7 @@ public class SpringWebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor).addPathPatterns("/**").excludePathPatterns(
-                "/", "/home", "/login", "/sign-in", "/auth/**", "/NotFound");
+                "/", "/home", "/login", "/sign-in", "/auth/**", "/css/**", "/js/**", "/img/**", "/uploads/**");
         registry.addInterceptor(adminAuthenticationInterceptor).addPathPatterns("/admin/**");
     }
 

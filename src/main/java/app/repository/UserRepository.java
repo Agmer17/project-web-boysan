@@ -139,6 +139,18 @@ public class UserRepository {
         return result;
     }
 
+    public boolean existByEmail(String email) {
+        String sql = """
+                select count(*) from users
+                where email = :email
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource().addValue("email", email, Types.VARCHAR);
+
+        Integer count = db.queryForObject(sql, params, Integer.class);
+
+        return count != null && count > 0;
+    }
+
     private boolean isValidStringUpdate(String data) {
         if (data == null) {
             return false;
