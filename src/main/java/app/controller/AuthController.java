@@ -35,7 +35,7 @@ public class AuthController {
 
         if (result.hasErrors()) {
             throw new PostsDataNotValidException(result, "login",
-                    "harap lengkapi dan isi dengan benar semua data login");
+                    "harap lengkapi dan isi dengan benar semua data login", request);
         }
 
         svc.LoginService(request.getUsername(), request.getPassword(), responseObj);
@@ -62,8 +62,10 @@ public class AuthController {
     public String signInRequest(@Valid @ModelAttribute SignInRequest request, BindingResult result) {
 
         if (result.hasErrors()) {
-            throw new PostsDataNotValidException(result, "sign-in", "data yang kamu masukkan gak valid!");
+            throw new PostsDataNotValidException(result, "sign-in", "data yang kamu masukkan gak valid!", request);
         }
+
+        svc.signInServcie(request);
 
         return "redirect:/login";
     }

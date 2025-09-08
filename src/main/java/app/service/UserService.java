@@ -35,11 +35,14 @@ public class UserService {
         UserProfileData oldData = repo.getUserProfile(currentUsername);
         MultipartFile img = updateReq.getProfilePicture();
 
-        if (oldData.getEmail() != updateReq.getEmail()) {
+        if (!oldData.getEmail().equals(updateReq.getEmail())) {
+            System.out.println(oldData.getEmail());
+            System.out.println(updateReq.getEmail());
 
             if (repo.existByEmail(updateReq.getEmail())) {
                 // todo bikin exception sendiri buat pas update data
-                throw new AuthCredentialsException("Data email sudah ada!", "user/my-profile");
+                throw new AuthCredentialsException("Data email sudah ada!",
+                        "user/my-profile", "email");
             }
         }
 
@@ -51,7 +54,8 @@ public class UserService {
                 ImageType mediaType = ImageFileVerificator.verifyImageType(stream);
 
                 if (mediaType == ImageType.UNKNOWN) {
-                    throw new InvalidFileType("File gambar tidak valid! harap upload png, webp, jpg dan gif");
+                    throw new InvalidFileType("File gambar tidak valid! harap upload png, webp, jpg dan gif",
+                            "user/my-profile", "profilePicture");
                 }
 
                 imgFileName = FileUtils.handleUploads(img, mediaType);

@@ -30,14 +30,14 @@ public class AuthService {
             UserAuthDetails details = repo.findDetailsUsername(username);
 
             if (!BCrypt.checkpw(password, details.getPasswordHash())) {
-                throw new AuthCredentialsException("Password yang kamu masukkan salah!", "login");
+                throw new AuthCredentialsException("Password yang kamu masukkan salah!", "login", "password");
             }
 
             responseObj.addCookie(this.generateCookie(details.getUsername(), details.getRole(), details.getId()));
             return true;
 
         } catch (EmptyResultDataAccessException e) {
-            throw new AuthCredentialsException("akun tidak ditemukan", "login");
+            throw new AuthCredentialsException("akun tidak ditemukan", "login", "username");
         }
     }
 
@@ -51,11 +51,21 @@ public class AuthService {
         String password = passwordEncoder.encode(request.getPassword());
 
         try {
+            System.out.println();
             return repo.save(username, password, fullName, email);
 
         } catch (DuplicateKeyException e) {
-            throw new AuthCredentialsException("akun sudah terdaftar!", "sign-in");
+            String errMsg = e.getMessage();
+            if (errMsg != null) {
+
+                if (errMsg.contains("users_email_key")) {
+                    throw new AuthCredentialsException("Email sudah terdaftar", "sign-in", "email");
+                }
+
+                throw new AuthCredentialsException("username telah terdaftar", "sign-in", "username");
+            }
         }
+        return true;
     }
 
     private Cookie generateCookie(String username, String role, int id) {
@@ -66,7 +76,4 @@ public class AuthService {
         cookie.setMaxAge(60 * 60 * 24 * 7);
         return cookie;
     }
-
-    // private void deleteCurrentLogin(HttpServletRequest request) {
-    // }
 }

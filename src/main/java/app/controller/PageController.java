@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import app.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class PageController {
@@ -47,6 +48,11 @@ public class PageController {
     @GetMapping("/admin/")
     public String getAdminPage() {
         return "AdminProduct";
+    }
+
+    @GetMapping("/errors")
+    public String errorPage(Model model) {
+        return "error/Errors";
     }
 
 }

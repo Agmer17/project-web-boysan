@@ -44,9 +44,15 @@ public class UserController {
             BindingResult bindingResult, @SessionAttribute Claims claims)
             throws IOException {
 
+        System.out.println(update);
+
         if (bindingResult.hasErrors()) {
-            throw new PostsDataNotValidException(bindingResult, "user/my-profile", "data yang kamu masukkan gak valid");
+
+            throw new PostsDataNotValidException(bindingResult, "user/my-profile", "data yang kamu masukkan gak valid",
+                    update);
         }
+
+        userService.updateUserData(update, claims);
         return "redirect:/user/my-profile";
     }
 
