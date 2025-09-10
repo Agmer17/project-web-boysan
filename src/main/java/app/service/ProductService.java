@@ -2,6 +2,7 @@ package app.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -44,21 +45,33 @@ public class ProductService {
 
         BaseServiceProduct svResult = productRepo.save(newProduct);
 
-        System.out.println(svResult);
+        // System.out.println(svResult);
 
         // save dan verif image dulu boy
-        List<String> allImageUrl = FileUtils.handleBatchUploadsImage(newProduct.getImages());
 
-        List<ImageProduct> convertRs = imageProductService.makeImageObject(svResult.getId(), allImageUrl);
+        List<String> allImageUrl = null;
 
-        List<ImageProduct> svImg = imageProductService.save(convertRs);
+        if (newProduct.getImages() != null) {
+            allImageUrl = FileUtils.handleBatchUploadsImage(newProduct.getImages());
+            List<ImageProduct> convertRs = imageProductService.makeImageObject(svResult.getId(), allImageUrl);
+            imageProductService.save(convertRs);
 
-        System.out.println(svImg);
-
-        System.out.println(svResult);
+        }
 
         return svResult;
 
+    }
+
+    public void deleteProducts(UUID productId) {
+
+        List<ImageProduct> ls = imageProductService.findByServiceId(productId);
+
+        // delete dulu image di server nya
+        for (ImageProduct imageProduct : ls) {
+            FileUtils.deleteImage(imageProduct.getImageUrl());
+        }
+
+        productRepo.remove(productId);
     }
 
 }
