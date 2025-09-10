@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import app.model.exception.InvalidFileType;
 import app.utils.ImageFileVerificator.ImageType;
 
 public class FileUtils {
@@ -28,6 +31,24 @@ public class FileUtils {
         file.transferTo(uploadDir.resolve(newFileSave));
 
         return randomNewFileName + fileExt;
+    }
+
+    public static List<String> handleBatchUploadsImage(List<MultipartFile> files) throws IOException {
+
+        List<String> imgUrl = new ArrayList<>();
+
+        for (MultipartFile multipartFile : files) {
+            ImageType type = ImageFileVerificator.verifyImageType(multipartFile.getInputStream());
+
+            if (type == ImageType.UNKNOWN) {
+                throw new InvalidFileType("File gambar tidak valid! harap upload png, webp, jpg dan gif",
+                        "user/my-profile", "profilePicture");
+            }
+
+            imgUrl.add(handleUploads(multipartFile, type));
+        }
+
+        return imgUrl;
     }
 
     public static Path getAbsolutePathFromRelative(String relativePath) {

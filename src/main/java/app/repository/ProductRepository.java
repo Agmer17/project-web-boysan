@@ -3,11 +3,15 @@ package app.repository;
 import java.sql.Types;
 import java.util.List;
 
+import org.eclipse.angus.mail.handlers.text_html;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import app.model.dto.NewServiceProduct;
+import app.model.pojo.BaseServiceProduct;
 import app.model.pojo.ProductEntity;
 import app.utils.ProductServiceRowMapper;
 
@@ -63,6 +67,23 @@ public class ProductRepository {
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", id, Types.OTHER);
         ProductEntity rs = db.queryForObject(sql, params, productMapper);
+
+        return rs;
+    }
+
+    public BaseServiceProduct save(NewServiceProduct newProducts) {
+        String sql = """
+                    insert into services (category_id, name, description, price)
+                values (:categoryId, :name, :desc, :price)
+                returning *
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("categoryId", newProducts.getCategoryId(), Types.OTHER)
+                .addValue("name", newProducts.getName(), Types.VARCHAR)
+                .addValue("desc", newProducts.getDesc(), Types.VARCHAR)
+                .addValue("price", newProducts.getPrice(), Types.NUMERIC);
+
+        BaseServiceProduct rs = db.queryForObject(sql, params, new BeanPropertyRowMapper<>(BaseServiceProduct.class));
 
         return rs;
     }

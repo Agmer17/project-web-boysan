@@ -1,6 +1,7 @@
 package app.repository;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -106,5 +107,26 @@ public class ProductImageRepository {
 
         Integer count = template.queryForObject(sql, params, Integer.class);
         return count != null ? count : 0;
+    }
+
+    public List<ImageProduct> saveBatchWithReturning(List<ImageProduct> imageProducts) {
+        if (imageProducts == null || imageProducts.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String sql = "INSERT INTO service_images (service_id, image_url) VALUES (:serviceId, :imageUrl) RETURNING *";
+
+        List<ImageProduct> savedImages = new ArrayList<>();
+
+        for (ImageProduct imageProduct : imageProducts) {
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("serviceId", imageProduct.getServiceId())
+                    .addValue("imageUrl", imageProduct.getImageUrl());
+
+            ImageProduct saved = template.queryForObject(sql, params, new BeanPropertyRowMapper<>(ImageProduct.class));
+            savedImages.add(saved);
+        }
+
+        return savedImages;
     }
 }

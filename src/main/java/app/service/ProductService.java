@@ -1,20 +1,28 @@
 package app.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import app.model.dto.NewServiceProduct;
 import app.model.exception.ResourceNotFoundException;
+import app.model.pojo.BaseServiceProduct;
+import app.model.pojo.ImageProduct;
 import app.model.pojo.ProductEntity;
 import app.repository.ProductRepository;
+import app.utils.FileUtils;
 
 @Service
 public class ProductService {
 
     @Autowired
     private ProductRepository productRepo;
+
+    @Autowired
+    private ImageProductService imageProductService;
 
     public List<ProductEntity> getAllProducts() {
         List<ProductEntity> allProducts = productRepo.getAll();
@@ -29,6 +37,27 @@ public class ProductService {
         } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException("Produk tidak ditemukan!", "admin/products/items/" + id);
         }
+
+    }
+
+    public BaseServiceProduct addNewProduct(NewServiceProduct newProduct) throws IOException {
+
+        BaseServiceProduct svResult = productRepo.save(newProduct);
+
+        System.out.println(svResult);
+
+        // save dan verif image dulu boy
+        List<String> allImageUrl = FileUtils.handleBatchUploadsImage(newProduct.getImages());
+
+        List<ImageProduct> convertRs = imageProductService.makeImageObject(svResult.getId(), allImageUrl);
+
+        List<ImageProduct> svImg = imageProductService.save(convertRs);
+
+        System.out.println(svImg);
+
+        System.out.println(svResult);
+
+        return svResult;
 
     }
 
