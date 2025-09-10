@@ -39,3 +39,5 @@ uploads/
 
 node_module/
 *.css
+
+/src/main/resources/templates

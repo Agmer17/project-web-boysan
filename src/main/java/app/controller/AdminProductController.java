@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import app.model.dto.NewServiceProduct;
@@ -67,9 +68,11 @@ public class AdminProductController {
         return null;
     }
 
-    @DeleteMapping("/remove/{id}")
-    public String deleteProducts(@PathVariable String id) {
-        return null;
+    @DeleteMapping("/remove")
+    public ResponseEntity<Object> deleteProducts(@RequestParam UUID serviceId) {
+        productService.deleteProducts(serviceId);
+
+        return ResponseEntity.status(204).body(null);
     }
 
 }

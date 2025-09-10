@@ -5,8 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Upload Product</title>
   </head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background: #f4f4f4;
+    }
+    img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+    }
+    button {
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+  </style>
   <body>
+    <h1>halo admin {{currentAdmin}}</h1>
     <h1>Unggah Produk Baru</h1>
+
+    <div id="categoryService"></div>
+
     <form id="productForm" enctype="multipart/form-data">
       <div>
         <label for="categoryId">Kategori ID:</label>
@@ -26,10 +57,29 @@
       <button type="submit">Unggah Produk</button>
     </form>
 
+    <h2>Daftar Produk</h2>
+    <div id="status">Loading...</div>
+
+    <table id="products-table" style="display: none">
+      <thead>
+        <tr>
+          <th>Gambar</th>
+          <th>Service</th>
+          <th>Deskripsi</th>
+          <th>Kategori</th>
+          <th>Harga</th>
+          <th>Created At</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="products-body"></tbody>
+    </table>
+
     <script>
       const form = document.getElementById("productForm");
       const imagesInput = document.getElementById("images");
       const previewDiv = document.getElementById("preview");
+      const categoryDiv = document.getElementById("categoryService");
 
       // Array global untuk simpan semua file
       let allFiles = [];
@@ -86,6 +136,125 @@
         });
         console.log(await response.text());
       });
+
+      async function fetchProducts() {
+        const status = document.getElementById("status");
+        const table = document.getElementById("products-table");
+        const tbody = document.getElementById("products-body");
+
+        status.textContent = "Loading...";
+        table.style.display = "none";
+        tbody.innerHTML = "";
+
+        try {
+          const res = await fetch("/admin/products/all-products");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+
+          const products = await res.json();
+
+          if (products.length === 0) {
+            status.textContent = "Tidak ada produk.";
+            return;
+          }
+
+          for (const p of products) {
+            const tr = document.createElement("tr");
+
+            // gambar (ambil gambar pertama saja)
+            const tdImg = document.createElement("td");
+            if (Array.isArray(p.imageUrl) && p.imageUrl.length > 0) {
+              const img = document.createElement("img");
+              img.src = "/uploads/" + p.imageUrl[0];
+              tdImg.appendChild(img);
+            } else {
+              tdImg.textContent = "(no image)";
+            }
+            tr.appendChild(tdImg);
+
+            // service
+            const tdName = document.createElement("td");
+            tdName.textContent = p.serviceName;
+            tr.appendChild(tdName);
+
+            // deskripsi
+            const tdDesc = document.createElement("td");
+            tdDesc.textContent = p.serviceDescription;
+            tr.appendChild(tdDesc);
+
+            // kategori
+            const tdCat = document.createElement("td");
+            tdCat.textContent = p.categoryName;
+            tr.appendChild(tdCat);
+
+            // harga
+            const tdPrice = document.createElement("td");
+            tdPrice.textContent = p.price;
+            tr.appendChild(tdPrice);
+
+            // createdAt
+            const tdCreated = document.createElement("td");
+            tdCreated.textContent = p.createdAt
+              ? new Date(p.createdAt).toLocaleString()
+              : "-";
+            tr.appendChild(tdCreated);
+
+            // tombol delete
+            const tdAction = document.createElement("td");
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.onclick = () => deleteProduct(p.serviceId);
+            tdAction.appendChild(delBtn);
+            tr.appendChild(tdAction);
+
+            tbody.appendChild(tr);
+          }
+
+          table.style.display = "";
+          status.textContent = "Loaded " + products.length + " produk.";
+        } catch (err) {
+          console.error(err);
+          status.textContent = "Error load produk: " + err.message;
+        }
+      }
+
+      async function deleteProduct(serviceId, serviceName) {
+        if (!confirm("Yakin hapus produk: " + serviceName + "?")) return;
+
+        try {
+          const res = await fetch(
+            "/admin/products/remove?serviceId=" + encodeURIComponent(serviceId),
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (res.ok) {
+            await fetchProducts(); // reload list setelah hapus
+          } else {
+            alert("Gagal hapus. HTTP " + res.status);
+          }
+        } catch (err) {
+          alert("Error: " + err);
+        }
+      }
+
+      async function getCategory() {
+        const categoryDiv = document.getElementById("categoryService");
+        categoryDiv.innerHTML = "";
+
+        const res = await fetch("/admin/category/all");
+        const data = await res.json();
+
+        data.forEach((element) => {
+          let h1 = document.createElement("h1");
+          h1.textContent = `id : ${element.id} nama : ${element.name}`;
+
+          categoryDiv.appendChild(h1); // append ke container
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchProducts);
+      document.addEventListener("DOMContentLoaded", getCategory);
     </script>
   </body>
 </html>

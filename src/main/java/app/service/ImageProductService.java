@@ -40,4 +40,8 @@ public class ImageProductService {
         return listOfImageProducts;
 
     }
+
+    public List<ImageProduct> findByServiceId(UUID serviceId) {
+        return repo.findByServiceId(serviceId);
+    }
 }
