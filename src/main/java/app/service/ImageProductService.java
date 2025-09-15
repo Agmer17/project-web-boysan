@@ -44,4 +44,8 @@ public class ImageProductService {
     public List<ImageProduct> findByServiceId(UUID serviceId) {
         return repo.findByServiceId(serviceId);
     }
+
+    public void removeImage(UUID id) {
+        repo.deleteById(id);
+    }
 }
