@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+import app.model.common.CommonProductService;
 import app.model.dto.NewServiceProduct;
 import app.model.pojo.BaseServiceProduct;
 import app.model.pojo.ProductEntity;
@@ -64,7 +65,9 @@ public class AdminProductController {
 
     @PatchMapping("/edit/{id}")
     @ResponseBody
-    public String editProducts(@PathVariable String id) {
+    // *ini buat ngedit productnya aja, untuk edit gambar ataupun categorynya pake
+    // di controller masing masing*/
+    public String editProducts(@ModelAttribute CommonProductService request) {
         return null;
     }
 
