@@ -54,6 +54,7 @@ public class UserController {
 
         userService.updateUserData(update, claims);
         return "redirect:/user/my-profile";
+        
     }
 
 }
